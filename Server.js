@@ -6,13 +6,13 @@ const path  = require('path');
 const { urlencoded } = require('body-parser');
 
 var app=express();
-const port = 3000;
+const port = 3001;
 
-const bioPath = path.join(___dirname, 'biologia.json')
-const quiPath = path.join(___dirname, 'quimica.json')
-const fisPath = path.join(___dirname, 'fisica.json')
+const bioPath = path.join(__dirname, 'biologia.json')
+const quiPath = path.join(__dirname, 'quimica.json')
+const fisPath = path.join(__dirname, 'fisica.json')
 
-app.use(express.json)
+app.use(express.json())
 app.use(urlencoded ({extended: true}))
 
 let bioData = fs.readFileSync(bioPath,'utf8');
@@ -24,42 +24,30 @@ let fisica = JSON.parse(fisData);
 
 function lerJson(res, file) {
     fs.readFile(file, function(err, data) {
-        res.end(data)
+        res.end(data);
     });
 }
 
 
-function buscarAssunto(nome) {
+app.get('/addbio', (req, res) => {
+    res.sendFile(path.join(__dirname + '/addbio.html'));
+});
+app.get('/addqui', (req, res) => {
+    res.sendFile(path.join(__dirname + '/addqui.html'));
+});
+app.get('/addfis', (req, res) => {
+    res.sendFile(path.join(__dirname + '/addfis.html'));
+});
+app.get('/biologia', (req, res) => {
+    res.sendFile(path.join(__dirname + '/biologia.json'));
+});
+app.get('/quimica', (req, res) => {
+    res.sendFile(path.join(__dirname + '/quimica.json'));
+});
+app.get('/fisica', (req, res) => {
+    res.sendFile(path.join(__dirname + '/fisica.json'));
+});
 
-    return
-
-}
-
-
-function callback(req, res) {
-
-    response.writeHead(200, {"Content-type": "application/json; charset=utf-8"})
-
-    var parts = url.parse(request.url);
-    var path = part.path;
-
-    if(path == '/biologia') {
-
-        lerJson (response,"biologia.json");
-    } else
-    if(path == '/quimica') {
-
-        lerJson (response,"quimica.json");
-    } else 
-    if(path == '/fisica') {
-
-        lerJson (response,"fisica.json");
-    } else {
-        response.end("caminho não encontrado: " + path);
-    }
- 
-
-}
 
 
 
@@ -74,29 +62,16 @@ function SalvarF() {
 }
 
 
+app.post('/addbio', (req, res) => {
+    console.log(req.body)
+    const novoAssuntoB  = req.body;
 
-app.get('/adicionar-assunto-biologia', (req, res) => {
-    res.sendFile(path.join(__dirname + '/addbio'));
-});
-app.get('/adicionar-assunto-quimica', (req, res) => {
-    res.sendFile(path.join(__dirname + '/addqui'));
-});
-app.get('/adicionar-assunto-fisica', (req, res) => {
-    res.sendFile(path.join(__dirname + '/addfis'));
-});
-
-
-
-
-app.post('/adicionar-assunto-biologia', (req, res) => {
-    const novoAssunto  = req.body;
-
-    if (biologia.find(biologia => biologia.nome.toLowerCase() === novoAssunto.nome.toLowerCase())) {
+    if (biologia.find(biologia => biologia.titulo.toLowerCase() === novoAssuntoB.titulo.toLowerCase())) {
         res.send("<h1>Este assunto já existe!</h1>");
         return;
     }
 
-    biologia.push(novoAssunto);
+    biologia.push(novoAssuntoB);
 
     SalvarB();
 
@@ -106,44 +81,36 @@ app.post('/adicionar-assunto-biologia', (req, res) => {
 
 
 
-app.post('/adicionar-assunto-biologia', (req, res) => {
-    const novoAssunto  = req.body;
+app.post('/addqui', (req, res) => {
+    const novoAssuntoQ = req.body;
+    if (!novoAssuntoQ.titulo || quimica.find(q => q.titulo.toLowerCase() === novoAssuntoQ.titulo.toLowerCase())) {
+        res.send("<h1>Este assunto já existe ou título não fornecido!</h1>");
+        return;
+    }
 
-    if (biologia.find(biologia => biologia.nome.toLowerCase() === novoAssunto.nome.toLowerCase())) {
+    quimica.push(novoAssuntoQ);
+    SalvarQ();
+    res.send("<h1>Assunto adicionado com sucesso!</h1>");
+});
+
+
+
+app.post('/addfis', (req, res) => {
+    const novoAssuntoF  = req.body;
+
+    if (fisica.find(fisica => fisica.titulo.toLowerCase() === novoAssuntoF.titulo.toLowerCase())) {
         res.send("<h1>Este assunto já existe!</h1>");
         return;
     }
 
-    biologia.push(novoAssunto);
+    fisica.push(novoAssunto);
 
-    SalvarB();
+    SalvarF();
 
     res.send("<h1>Assunto adicionado com sucesso!</h1>");
 
 });
 
-
-
-app.post('/adicionar-assunto-biologia', (req, res) => {
-    const novoAssunto  = req.body;
-
-    if (biologia.find(biologia => biologia.nome.toLowerCase() === novoAssunto.nome.toLowerCase())) {
-        res.send("<h1>Este assunto já existe!</h1>");
-        return;
-    }
-
-    biologia.push(novoAssunto);
-
-    SalvarB();
-
-    res.send("<h1>Assunto adicionado com sucesso!</h1>");
-
+app.listen(port, () => {
+console.log(`servidor iniciado em http://localhost:${port}`)
 });
-
-
-
-var server = http.createServer(callback);
-
-server.listen(3000);
-
-console.log(`servidor iniciado em http://${port}`)
