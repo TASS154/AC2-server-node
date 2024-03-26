@@ -22,6 +22,10 @@ let fisica = JSON.parse(fisData);
 app.use(express.json())
 app.use(urlencoded ({extended: true}))
 
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname + '/index.html'));
+});
 app.get('/addbio', (req, res) => {
     res.sendFile(path.join(__dirname + '/addbio.html'));
 });
@@ -40,7 +44,10 @@ app.get('/quimica', (req, res) => {
 app.get('/fisica', (req, res) => {
     res.sendFile(path.join(__dirname + '/fisica.json'));
 });
-app.get('/BuscarAssunto/:titulo', (req,res) =>{
+app.get('/BuscarAssunto', (req, res) => {
+    res.sendFile(path.join(__dirname + '/buscarAssunto.html'));
+});
+app.get('/buscarAssunto/:titulo', (req,res) =>{
 
     const tituloAssuntoBuscado = req.params.titulo;
 
@@ -99,7 +106,12 @@ app.post('/addbio', (req, res) => {
 
 });
 
-
+app.get('/buscarAssunto', (req, res) => {
+    var tituloURL
+    const ArtigoBuscado = req.query.tituloURL;
+    res.send("<h1>TESTE</h1>")
+    console.log(ArtigoBuscado)
+})
 
 app.post('/addqui', (req, res) => {
     const novoAssuntoQ = req.body;
