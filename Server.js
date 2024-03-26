@@ -12,9 +12,6 @@ const bioPath = path.join(__dirname, 'biologia.json')
 const quiPath = path.join(__dirname, 'quimica.json')
 const fisPath = path.join(__dirname, 'fisica.json')
 
-app.use(express.json())
-app.use(urlencoded ({extended: true}))
-
 let bioData = fs.readFileSync(bioPath,'utf8');
 let quiData = fs.readFileSync(quiPath,'utf8');
 let fisData = fs.readFileSync(fisPath,'utf8');
@@ -22,12 +19,8 @@ let biologia = JSON.parse(bioData);
 let quimica =  JSON.parse(quiData);
 let fisica = JSON.parse(fisData);
 
-function lerJson(res, file) {
-    fs.readFile(file, function(err, data) {
-        res.end(data);
-    });
-}
-
+app.use(express.json())
+app.use(urlencoded ({extended: true}))
 
 app.get('/addbio', (req, res) => {
     res.sendFile(path.join(__dirname + '/addbio.html'));
@@ -47,9 +40,31 @@ app.get('/quimica', (req, res) => {
 app.get('/fisica', (req, res) => {
     res.sendFile(path.join(__dirname + '/fisica.json'));
 });
+app.get('/BuscarAssunto/:titulo', (req,res) =>{
 
+    const tituloAssuntoBuscado = req.params.titulo;
 
+    const AssuntoEncontradoB = BuscarAssuntoBiologia(tituloAssuntoBuscado)
+    const AssuntoEncontradoQ = BuscarAssuntoQuimica(tituloAssuntoBuscado)
+    const AssuntoEncontradoF = BuscarAssuntoFisica(tituloAssuntoBuscado)
 
+    if (AssuntoEncontradoB || AssuntoEncontradoF || AssuntoEncontradoQ) {
+        res.send(`<h1>Assunto encontrado: </h1><pre>
+        ${JSON.stringify(AssuntoEncontradoB || AssuntoEncontradoF || AssuntoEncontradoQ, null, 2)} </pre>`);
+    } else {
+        res.send(`<h1>Assunto não encontrado</h1>`)
+    }
+});
+
+function BuscarAssuntoBiologia(titulo) {
+    return biologia.find(biologia => biologia.titulo.toLowerCase() === titulo.toLowerCase());
+}
+function BuscarAssuntoQuimica(titulo) {
+    return quimica.find(quimica => quimica.titulo.toLowerCase() === titulo.toLowerCase());
+}
+function BuscarAssuntoFisica(titulo) {
+    return fisica.find(fisica => fisica.titulo.toLowerCase() === titulo.toLowerCase());
+}
 
 function SalvarB() {
     fs.writeFileSync(bioPath ,JSON.stringify(biologia, null, 2))
@@ -59,6 +74,11 @@ function SalvarQ() {
 }
 function SalvarF() {
     fs.writeFileSync(fisPath ,JSON.stringify(fisica, null, 2))
+}
+function lerJson(res, file) {
+    fs.readFile(file, function(err, data) {
+        res.end(data);
+    });
 }
 
 
@@ -83,8 +103,8 @@ app.post('/addbio', (req, res) => {
 
 app.post('/addqui', (req, res) => {
     const novoAssuntoQ = req.body;
-    if (!novoAssuntoQ.titulo || quimica.find(q => q.titulo.toLowerCase() === novoAssuntoQ.titulo.toLowerCase())) {
-        res.send("<h1>Este assunto já existe ou título não fornecido!</h1>");
+    if (quimica.find(quimica => quimica.titulo.toLowerCase() === novoAssuntoQ.titulo.toLowerCase())) {
+        res.send("<h1>Este assunto já existe!</h1>");
         return;
     }
 
@@ -103,7 +123,7 @@ app.post('/addfis', (req, res) => {
         return;
     }
 
-    fisica.push(novoAssunto);
+    fisica.push(novoAssuntoF);
 
     SalvarF();
 
