@@ -61,6 +61,8 @@ app.get('/buscarAssunto/:titulo', (req,res) =>{
     } else {
         res.send(`<h1>Assunto não encontrado</h1>`)
     }
+
+    
 });
 
 function BuscarAssuntoBiologia(titulo) {
